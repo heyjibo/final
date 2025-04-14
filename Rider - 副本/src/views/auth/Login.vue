@@ -2,8 +2,8 @@
   <div class="login-container">
     <div class="login-box">
       <div class="login-title">
-        <h2>校园外卖配送系统</h2>
-        <p>欢迎登录</p>
+        <h2>Campus Food Delivery System</h2>
+        <p>Welcome to Login</p>
       </div>
       
       <el-form :model="loginForm" :rules="loginRules" ref="loginForm" label-width="0px">
@@ -11,7 +11,7 @@
           <el-input 
             v-model="loginForm.username" 
             prefix-icon="el-icon-user" 
-            placeholder="请输入用户名"
+            placeholder="Username"
             @keyup.enter.native="handleLogin">
           </el-input>
         </el-form-item>
@@ -20,7 +20,7 @@
           <el-input 
             v-model="loginForm.password" 
             prefix-icon="el-icon-lock" 
-            placeholder="请输入密码" 
+            placeholder="Password" 
             show-password
             @keyup.enter.native="handleLogin">
           </el-input>
@@ -28,20 +28,20 @@
         
         <el-form-item prop="userType" class="user-type-selector">
           <el-radio-group v-model="loginForm.userType">
-            <el-radio label="rider">骑手</el-radio>
-            <el-radio label="admin">管理员</el-radio>
+            <el-radio label="rider">Rider</el-radio>
+            <el-radio label="admin">Admin</el-radio>
           </el-radio-group>
         </el-form-item>
         
         <el-form-item>
           <el-button type="primary" :loading="loading" @click="handleLogin" class="login-button">
-            登录
+            Login
           </el-button>
         </el-form-item>
         
         <div class="login-options">
-          <el-checkbox v-model="rememberMe">记住我</el-checkbox>
-          <span class="register-link" @click="goToRegister">还没有账号？立即注册</span>
+          <el-checkbox v-model="rememberMe">Remember Me</el-checkbox>
+          <span class="register-link" @click="goToRegister">Don't have an account? Register</span>
         </div>
       </el-form>
     </div>
@@ -49,6 +49,8 @@
 </template>
 
 <script>
+import { login } from '@/api/auth'
+
 export default {
   name: 'Login',
   data() {
@@ -56,112 +58,153 @@ export default {
       loginForm: {
         username: '',
         password: '',
-        userType: 'rider' // 默认为骑手登录
+        userType: 'rider' // Default as rider
       },
       loginRules: {
         username: [
-          { required: true, message: '请输入用户名', trigger: 'blur' },
-          { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
+          { required: true, message: 'Please enter username', trigger: 'blur' },
+          { min: 3, max: 20, message: 'Length should be 3 to 20 characters', trigger: 'blur' }
         ],
         password: [
-          { required: true, message: '请输入密码', trigger: 'blur' },
-          { min: 6, max: 20, message: '长度在 6 到 20 个字符', trigger: 'blur' }
+          { required: true, message: 'Please enter password', trigger: 'blur' },
+          { min: 6, max: 20, message: 'Length should be 6 to 20 characters', trigger: 'blur' }
         ],
         userType: [
-          { required: true, message: '请选择用户类型', trigger: 'change' }
+          { required: true, message: 'Please select user type', trigger: 'change' }
         ]
       },
       loading: false,
-      rememberMe: false
+      rememberMe: false,
+      // Default accounts
+      defaultAccounts: {
+        admin: {
+          username: 'admin',
+          password: 'admin123'
+        },
+        rider: {
+          username: 'rider',
+          password: 'rider123'
+        }
+      }
     }
   },
   methods: {
-    // 登录处理
+    // Handle API login error fallback - use mock data when backend API is unavailable
+    handleLoginFallback() {
+      const accounts = [
+        {
+          id: 'admin1',
+          username: 'admin',
+          password: 'admin123',
+          userType: 'admin'
+        },
+        {
+          id: 'rider1',
+          username: 'rider',
+          password: 'rider123',
+          userType: 'rider'
+        }
+      ];
+      
+      const user = accounts.find(u => 
+        u.username === this.loginForm.username && 
+        u.password === this.loginForm.password &&
+        u.userType === this.loginForm.userType
+      );
+      
+      if (user) {
+        // Login success
+        const userData = {
+          id: user.id,
+          username: user.username,
+          userType: user.userType,
+          token: `mock-token-${Date.now()}`
+        };
+        
+        // Save to local storage
+        localStorage.setItem('currentUser', JSON.stringify(userData));
+        
+        // Success message
+        this.$message.success('Login successful (local mode)');
+        
+        // Redirect to appropriate page
+        if (this.loginForm.userType === 'admin') {
+          this.$router.push('/admin/dashboard');
+        } else {
+          this.$router.push('/rider/dashboard');
+        }
+      } else {
+        this.$message.error('Invalid username or password');
+      }
+      
+      this.loading = false;
+    },
+    
+    // Login handler
     handleLogin() {
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true
           
-          // 实际项目中这里应该调用后端API进行登录验证
-          // 这里使用本地存储的账号进行模拟登录
-          setTimeout(() => {
-            const localUsers = JSON.parse(localStorage.getItem('users') || '[]')
-            console.log('localUsers:', localUsers)
-            
-            const user = localUsers.find(u => 
-              u.username === this.loginForm.username && 
-              u.password === this.loginForm.password &&
-              u.userType === this.loginForm.userType
-            )
-            
-            if (user) {
-              // 登录成功
+          // Call login API
+          login(this.loginForm).then(response => {
+            if (response.code === 200) {
+              // Login successful
               const userData = {
-                id: user.id,
-                username: user.username,
-                userType: user.userType,
-                token: `token-${Date.now()}`
+                id: response.data.id,
+                username: response.data.username,
+                userType: response.data.userType,
+                token: response.data.token
               }
               
-              // 保存到本地存储
+              // Save to local storage
               localStorage.setItem('currentUser', JSON.stringify(userData))
               
-              // 根据用户类型跳转不同页面
-              this.$message.success('登录成功')
-              
-              console.log('登录成功，用户类型：', this.loginForm.userType)
-              
-              // 延迟一下再跳转，确保本地存储已更新
-              setTimeout(() => {
-                if (this.loginForm.userType === 'admin') {
-                  this.$router.push('/admin/dashboard')
-                } else {
-                  this.$router.push('/rider/dashboard')
+              // If remember me is checked, save login info
+              if (this.rememberMe) {
+                const savedInfo = {
+                  username: this.loginForm.username,
+                  userType: this.loginForm.userType,
+                  rememberMe: true
                 }
-              }, 100)
-            } else {
-              // 尝试添加一个默认用户
-              if (localUsers.length === 0) {
-                const defaultUsers = [
-                  {
-                    id: 'admin1',
-                    username: 'admin',
-                    password: 'admin123',
-                    userType: 'admin',
-                    createTime: new Date().toISOString()
-                  },
-                  {
-                    id: 'rider1',
-                    username: 'rider',
-                    password: 'rider123',
-                    userType: 'rider',
-                    createTime: new Date().toISOString()
-                  }
-                ]
-                localStorage.setItem('users', JSON.stringify(defaultUsers))
-                this.$message.info('系统中没有用户，已添加默认用户。请使用默认账号重新登录。')
-                this.loading = false
-                return
+                localStorage.setItem('savedLoginInfo', JSON.stringify(savedInfo))
+              } else {
+                localStorage.removeItem('savedLoginInfo')
               }
               
-              this.$message.error('用户名或密码错误')
+              // Success message
+              this.$message.success('Login successful')
+              
+              // Redirect based on user type
+              if (this.loginForm.userType === 'admin') {
+                this.$router.push('/admin/dashboard')
+              } else {
+                this.$router.push('/rider/dashboard')
+              }
+            } else {
+              // Login failed
+              this.$message.error(response.message || 'Login failed')
             }
-            
             this.loading = false
-          }, 1000)
+          }).catch(error => {
+            console.error('Login failed:', error)
+            this.$message.warning('Backend API connection failed, using local login mode')
+            // Use fallback method
+            this.handleLoginFallback()
+          })
         } else {
           return false
         }
       })
     },
     
-    // 跳转到注册页
+    // Go to register page
     goToRegister() {
       this.$router.push('/register')
     }
   },
   mounted() {
-    // 检查本地存储是否有保存的登录信息
+    // Check if there's saved login info
     const savedUser = localStorage.getItem('savedLoginInfo')
     if (savedUser) {
       const { username, userType, rememberMe } = JSON.parse(savedUser)
@@ -170,7 +213,7 @@ export default {
       this.rememberMe = rememberMe
     }
     
-    // 如果已登录，直接跳转到对应页面
+    // If already logged in, redirect to appropriate page
     const currentUser = localStorage.getItem('currentUser')
     if (currentUser) {
       const { userType } = JSON.parse(currentUser)

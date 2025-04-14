@@ -2,8 +2,8 @@
   <div class="register-container">
     <div class="register-box">
       <div class="register-title">
-        <h2>校园外卖配送系统</h2>
-        <p>账号注册</p>
+        <h2>Campus Food Delivery System</h2>
+        <p>Account Registration</p>
       </div>
       
       <el-form :model="registerForm" :rules="registerRules" ref="registerForm" label-width="0px">
@@ -11,7 +11,7 @@
           <el-input 
             v-model="registerForm.username" 
             prefix-icon="el-icon-user" 
-            placeholder="请输入用户名">
+            placeholder="Username">
           </el-input>
         </el-form-item>
         
@@ -19,7 +19,7 @@
           <el-input 
             v-model="registerForm.password" 
             prefix-icon="el-icon-lock" 
-            placeholder="请输入密码" 
+            placeholder="Password" 
             show-password>
           </el-input>
         </el-form-item>
@@ -28,7 +28,7 @@
           <el-input 
             v-model="registerForm.confirmPassword" 
             prefix-icon="el-icon-lock" 
-            placeholder="请确认密码" 
+            placeholder="Confirm Password" 
             show-password>
           </el-input>
         </el-form-item>
@@ -37,14 +37,14 @@
           <el-input 
             v-model="registerForm.phone" 
             prefix-icon="el-icon-mobile-phone" 
-            placeholder="请输入手机号">
+            placeholder="Phone Number">
           </el-input>
         </el-form-item>
         
         <el-form-item prop="userType" class="user-type-selector">
           <el-radio-group v-model="registerForm.userType">
-            <el-radio label="rider">骑手</el-radio>
-            <el-radio label="admin">管理员</el-radio>
+            <el-radio label="rider">Rider</el-radio>
+            <el-radio label="admin">Admin</el-radio>
           </el-radio-group>
         </el-form-item>
         
@@ -52,19 +52,19 @@
           <el-input 
             v-model="registerForm.adminCode" 
             prefix-icon="el-icon-key" 
-            placeholder="请输入管理员邀请码">
+            placeholder="Admin Invitation Code">
           </el-input>
         </el-form-item>
         
         <el-form-item>
           <el-button type="primary" :loading="loading" @click="handleRegister" class="register-button">
-            注册
+            Register
           </el-button>
         </el-form-item>
         
         <div class="register-options">
-          <span>已有账号？</span>
-          <span class="login-link" @click="goToLogin">返回登录</span>
+          <span>Already have an account?</span>
+          <span class="login-link" @click="goToLogin">Back to Login</span>
         </div>
       </el-form>
     </div>
@@ -72,32 +72,34 @@
 </template>
 
 <script>
+import { register } from '@/api/auth'
+
 export default {
   name: 'Register',
   data() {
-    // 自定义校验规则 - 确认密码
+    // Custom validation rule - Confirm Password
     const validateConfirmPassword = (rule, value, callback) => {
       if (value !== this.registerForm.password) {
-        callback(new Error('两次输入密码不一致'))
+        callback(new Error('Passwords do not match'))
       } else {
         callback()
       }
     }
     
-    // 自定义校验规则 - 手机号
+    // Custom validation rule - Phone Number
     const validatePhone = (rule, value, callback) => {
       const phoneRegex = /^1[3-9]\d{9}$/
       if (!phoneRegex.test(value)) {
-        callback(new Error('请输入正确的手机号'))
+        callback(new Error('Please enter a valid phone number'))
       } else {
         callback()
       }
     }
     
-    // 自定义校验规则 - 管理员邀请码
+    // Custom validation rule - Admin Invitation Code
     const validateAdminCode = (rule, value, callback) => {
-      if (this.registerForm.userType === 'admin' && value !== 'admin123') {
-        callback(new Error('管理员邀请码错误'))
+      if (this.registerForm.userType === 'admin' && !value) {
+        callback(new Error('Please enter admin invitation code'))
       } else {
         callback()
       }
@@ -109,28 +111,28 @@ export default {
         password: '',
         confirmPassword: '',
         phone: '',
-        userType: 'rider', // 默认为骑手注册
+        userType: 'rider', // Default as rider
         adminCode: ''
       },
       registerRules: {
         username: [
-          { required: true, message: '请输入用户名', trigger: 'blur' },
-          { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
+          { required: true, message: 'Please enter username', trigger: 'blur' },
+          { min: 3, max: 20, message: 'Length should be 3 to 20 characters', trigger: 'blur' }
         ],
         password: [
-          { required: true, message: '请输入密码', trigger: 'blur' },
-          { min: 6, max: 20, message: '长度在 6 到 20 个字符', trigger: 'blur' }
+          { required: true, message: 'Please enter password', trigger: 'blur' },
+          { min: 6, max: 20, message: 'Length should be 6 to 20 characters', trigger: 'blur' }
         ],
         confirmPassword: [
-          { required: true, message: '请确认密码', trigger: 'blur' },
+          { required: true, message: 'Please confirm password', trigger: 'blur' },
           { validator: validateConfirmPassword, trigger: 'blur' }
         ],
         phone: [
-          { required: true, message: '请输入手机号', trigger: 'blur' },
+          { required: true, message: 'Please enter phone number', trigger: 'blur' },
           { validator: validatePhone, trigger: 'blur' }
         ],
         userType: [
-          { required: true, message: '请选择用户类型', trigger: 'change' }
+          { required: true, message: 'Please select user type', trigger: 'change' }
         ],
         adminCode: [
           { validator: validateAdminCode, trigger: 'blur' }
@@ -141,57 +143,95 @@ export default {
   },
   watch: {
     'registerForm.userType': function(val) {
-      // 当用户类型变更时，如果是管理员，需要验证管理员邀请码
+      // Validate admin code when user type changes to admin
       if (val === 'admin') {
         this.$refs.registerForm && this.$refs.registerForm.validateField('adminCode')
       }
     }
   },
   methods: {
-    // 注册处理
+    // Register handler
     handleRegister() {
       this.$refs.registerForm.validate(valid => {
         if (valid) {
           this.loading = true
           
-          // 实际项目中这里应该调用后端API进行注册
-          // 这里使用本地存储模拟注册
-          setTimeout(() => {
-            const localUsers = JSON.parse(localStorage.getItem('users') || '[]')
-            
-            // 检查用户名是否已存在
-            const existingUser = localUsers.find(u => u.username === this.registerForm.username)
-            if (existingUser) {
-              this.$message.error('用户名已存在')
-              this.loading = false
-              return
+          // Prepare registration data
+          const registerData = {
+            username: this.registerForm.username,
+            password: this.registerForm.password,
+            phone: this.registerForm.phone,
+            userType: this.registerForm.userType
+          }
+          
+          // Add admin code if user type is admin
+          if (this.registerForm.userType === 'admin') {
+            registerData.adminCode = this.registerForm.adminCode
+          }
+          
+          // Call registration API
+          register(registerData).then(response => {
+            if (response.code === 200) {
+              // Registration successful
+              this.$message.success('Registration successful, please login')
+              this.$router.push('/login')
+            } else {
+              // Registration failed
+              this.$message.error(response.message || 'Registration failed')
             }
-            
-            // 添加新用户
-            const newUser = {
-              id: Date.now().toString(),
-              username: this.registerForm.username,
-              password: this.registerForm.password,
-              phone: this.registerForm.phone,
-              userType: this.registerForm.userType,
-              createTime: new Date().toISOString()
-            }
-            
-            localUsers.push(newUser)
-            localStorage.setItem('users', JSON.stringify(localUsers))
-            
-            this.$message.success('注册成功，请登录')
-            this.$router.push('/login')
-            
             this.loading = false
-          }, 1000)
+          }).catch(error => {
+            console.error('Registration failed:', error)
+            this.$message.warning('Backend API connection failed, using local registration mode')
+            this.handleRegisterFallback(registerData)
+          })
         } else {
           return false
         }
       })
     },
     
-    // 跳转到登录页
+    // Local registration fallback
+    handleRegisterFallback(registerData) {
+      // Get registered users from local storage
+      const localUsers = JSON.parse(localStorage.getItem('users') || '[]')
+      
+      // Check if username already exists
+      const existingUser = localUsers.find(u => u.username === registerData.username)
+      if (existingUser) {
+        this.$message.error('Username already exists')
+        this.loading = false
+        return
+      }
+      
+      // Validate admin invitation code
+      if (registerData.userType === 'admin' && registerData.adminCode !== 'admin123') {
+        this.$message.error('Invalid admin invitation code')
+        this.loading = false
+        return
+      }
+      
+      // Create new user
+      const newUser = {
+        id: `user-${Date.now()}`,
+        username: registerData.username,
+        password: registerData.password,
+        phone: registerData.phone,
+        userType: registerData.userType,
+        createTime: new Date().toISOString()
+      }
+      
+      // Save to local storage
+      localUsers.push(newUser)
+      localStorage.setItem('users', JSON.stringify(localUsers))
+      
+      this.$message.success('Local registration successful, please login')
+      this.$router.push('/login')
+      
+      this.loading = false
+    },
+    
+    // Go to login page
     goToLogin() {
       this.$router.push('/login')
     }

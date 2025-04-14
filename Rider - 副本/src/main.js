@@ -11,6 +11,7 @@ Vue.config.productionTip = false
 
 // 创建Vue实例
 new Vue({
+  el: '#app',
   router,
-  render: (h) => h(App)
-}).$mount('#app')
+  render: h => h(App)
+})
