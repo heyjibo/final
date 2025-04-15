@@ -48,15 +48,15 @@ const router = new VueRouter({
 
 // Global router guard
 router.beforeEach((to, from, next) => {
-  // 设置页面标题
-  document.title = to.meta.title || '校园外卖配送系统'
+  // Set page title
+  document.title = to.meta.title || 'Campus Food Delivery System'
   
-  // 检查是否需要登录权限
+  // Check if authentication is required
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    // 获取本地存储的token
+    // Get token from local storage
     const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}')
     
-    // 如果没有token，重定向到登录页
+    // If no token, redirect to login page
     if (!currentUser.token) {
       next({
         path: '/login',
@@ -65,18 +65,18 @@ router.beforeEach((to, from, next) => {
       return
     }
     
-    // 如果有token但没有用户信息，尝试获取用户信息
+    // If has token but no user info, try to get user info
     if (!currentUser.username) {
       getUserInfo().then(response => {
         if (response.code === 200) {
-          // 更新用户信息
+          // Update user information
           localStorage.setItem('currentUser', JSON.stringify({
             ...currentUser,
             ...response.data
           }))
           next()
         } else {
-          // 获取用户信息失败，可能是token已过期
+          // Failed to get user info, token may be expired
           localStorage.removeItem('currentUser')
           next({
             path: '/login',
@@ -84,7 +84,7 @@ router.beforeEach((to, from, next) => {
           })
         }
       }).catch(() => {
-        // 请求出错，清除token
+        // Request error, clear token
         localStorage.removeItem('currentUser')
         next({
           path: '/login',
@@ -92,12 +92,12 @@ router.beforeEach((to, from, next) => {
         })
       })
     } else {
-      // 有用户信息，检查用户类型是否匹配
+      // Has user info, check if user type matches
       const userType = currentUser.userType
       const requiredType = to.meta.userType
       
       if (requiredType && userType !== requiredType) {
-        // 用户类型不匹配，重定向到对应的首页
+        // User type doesn't match, redirect to corresponding homepage
         next({
           path: userType === 'admin' ? '/admin/dashboard' : '/rider/dashboard'
         })
@@ -107,7 +107,7 @@ router.beforeEach((to, from, next) => {
       next()
     }
   } else {
-    // 不需要登录权限的页面直接通过
+    // Pages that don't require authentication pass directly
     next()
   }
 })

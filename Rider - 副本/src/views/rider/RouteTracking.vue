@@ -4,48 +4,48 @@
       <el-col :span="16">
         <el-card class="box-card">
           <div slot="header" class="clearfix">
-            <span>实时路线跟踪</span>
+            <span>Real-time Route Tracking</span>
             <el-button-group style="float: right;">
-              <el-button size="small" type="primary" @click="startTracking" :disabled="isTracking">开始跟踪</el-button>
-              <el-button size="small" type="danger" @click="stopTracking" :disabled="!isTracking">停止跟踪</el-button>
+              <el-button size="small" type="primary" @click="startTracking" :disabled="isTracking">Start Tracking</el-button>
+              <el-button size="small" type="danger" @click="stopTracking" :disabled="!isTracking">Stop Tracking</el-button>
             </el-button-group>
           </div>
-          <!-- 地图容器 -->
+          <!-- Map container -->
           <div id="map-container" style="height: 500px;"></div>
         </el-card>
       </el-col>
       <el-col :span="8">
         <el-card class="box-card">
           <div slot="header" class="clearfix">
-            <span>当前配送信息</span>
+            <span>Current Delivery Information</span>
           </div>
           <div v-if="currentDelivery">
-            <p><strong>订单编号:</strong> {{ currentDelivery.orderId }}</p>
-            <p><strong>配送状态:</strong> {{ currentDelivery.status }}</p>
-            <p><strong>配送地址:</strong> {{ currentDelivery.address }}</p>
-            <p><strong>预计送达:</strong> {{ currentDelivery.estimatedTime }}</p>
-            <p><strong>已行驶:</strong> {{ currentDelivery.distance }} 公里</p>
-            <p><strong>配送时长:</strong> {{ currentDelivery.duration }} 分钟</p>
+            <p><strong>Order ID:</strong> {{ currentDelivery.orderId }}</p>
+            <p><strong>Delivery Status:</strong> {{ currentDelivery.status }}</p>
+            <p><strong>Delivery Address:</strong> {{ currentDelivery.address }}</p>
+            <p><strong>Estimated Arrival:</strong> {{ currentDelivery.estimatedTime }}</p>
+            <p><strong>Distance Traveled:</strong> {{ currentDelivery.distance }} km</p>
+            <p><strong>Delivery Duration:</strong> {{ currentDelivery.duration }} minutes</p>
             <el-divider></el-divider>
             <div class="gps-info">
-              <p><strong>当前坐标:</strong> {{ gpsData.latitude }}, {{ gpsData.longitude }}</p>
-              <p><strong>速度:</strong> {{ gpsData.speed }} km/h</p>
-              <p><strong>方向:</strong> {{ gpsData.direction }}°</p>
-              <p><strong>最后更新:</strong> {{ gpsData.lastUpdate }}</p>
+              <p><strong>Current Coordinates:</strong> {{ gpsData.latitude }}, {{ gpsData.longitude }}</p>
+              <p><strong>Speed:</strong> {{ gpsData.speed }} km/h</p>
+              <p><strong>Direction:</strong> {{ gpsData.direction }}°</p>
+              <p><strong>Last Update:</strong> {{ gpsData.lastUpdate }}</p>
             </div>
             <el-progress :percentage="currentDelivery.progressPercentage" :color="customColorMethod" :text-inside="true" :stroke-width="20"></el-progress>
           </div>
           <div v-else class="no-data">
             <i class="el-icon-warning-outline"></i>
-            <p>当前没有进行中的配送</p>
+            <p>No ongoing deliveries</p>
           </div>
         </el-card>
         
         <el-card class="box-card" style="margin-top: 20px;">
           <div slot="header" class="clearfix">
-            <span>速度统计</span>
+            <span>Speed Statistics</span>
           </div>
-          <!-- 速度统计图表 -->
+          <!-- Speed chart -->
           <div id="speed-chart" style="height: 300px;"></div>
         </el-card>
       </el-col>
@@ -53,30 +53,30 @@
     
     <el-card class="box-card" style="margin-top: 20px;">
       <div slot="header" class="clearfix">
-        <span>历史配送路线</span>
-        <el-button style="float: right; padding: 3px 0" type="text" @click="refreshRouteHistory">刷新</el-button>
+        <span>Delivery History</span>
+        <el-button style="float: right; padding: 3px 0" type="text" @click="refreshRouteHistory">Refresh</el-button>
       </div>
       <el-table :data="routeHistory" stripe style="width: 100%" v-loading="loading">
-        <el-table-column prop="date" label="日期" width="180"></el-table-column>
-        <el-table-column prop="orderId" label="订单编号" width="150"></el-table-column>
-        <el-table-column prop="startAddress" label="起点" width="200"></el-table-column>
-        <el-table-column prop="endAddress" label="终点" width="200"></el-table-column>
-        <el-table-column prop="distance" label="距离(km)" width="100"></el-table-column>
-        <el-table-column prop="duration" label="时长(分钟)" width="120"></el-table-column>
-        <el-table-column prop="status" label="状态">
+        <el-table-column prop="date" label="Date" width="180"></el-table-column>
+        <el-table-column prop="orderId" label="Order ID" width="150"></el-table-column>
+        <el-table-column prop="startAddress" label="Start" width="200"></el-table-column>
+        <el-table-column prop="endAddress" label="End" width="200"></el-table-column>
+        <el-table-column prop="distance" label="Distance (km)" width="100"></el-table-column>
+        <el-table-column prop="duration" label="Duration (minutes)" width="120"></el-table-column>
+        <el-table-column prop="status" label="Status">
           <template slot-scope="scope">
-            <el-tag :type="scope.row.status === '已完成' ? 'success' : 'warning'">
+            <el-tag :type="scope.row.status === 'Completed' ? 'success' : 'warning'">
               {{ scope.row.status }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="150">
+        <el-table-column label="Action" width="150">
           <template slot-scope="scope">
-            <el-button size="mini" @click="viewRouteDetail(scope.row)">查看详情</el-button>
+            <el-button size="mini" @click="viewRouteDetail(scope.row)">View Details</el-button>
           </template>
         </el-table-column>
       </el-table>
-      <!-- 分页 -->
+      <!-- Pagination -->
       <div class="pagination-container">
         <el-pagination
           @size-change="handleSizeChange"
@@ -90,19 +90,19 @@
       </div>
     </el-card>
     
-    <!-- 路线详情对话框 -->
-    <el-dialog title="路线详情" :visible.sync="dialogVisible" width="70%">
+    <!-- Route details dialog -->
+    <el-dialog title="Route Details" :visible.sync="dialogVisible" width="70%">
       <div id="detail-map-container" style="height: 400px;"></div>
       <div style="margin-top: 20px;">
         <el-descriptions :column="2" border>
-          <el-descriptions-item label="订单编号">{{ selectedRoute.orderId }}</el-descriptions-item>
-          <el-descriptions-item label="配送日期">{{ selectedRoute.date }}</el-descriptions-item>
-          <el-descriptions-item label="起点">{{ selectedRoute.startAddress }}</el-descriptions-item>
-          <el-descriptions-item label="终点">{{ selectedRoute.endAddress }}</el-descriptions-item>
-          <el-descriptions-item label="配送距离">{{ selectedRoute.distance }}km</el-descriptions-item>
-          <el-descriptions-item label="配送时长">{{ selectedRoute.duration }}分钟</el-descriptions-item>
-          <el-descriptions-item label="配送状态">{{ selectedRoute.status }}</el-descriptions-item>
-          <el-descriptions-item label="骑手">{{ selectedRoute.rider || '未知' }}</el-descriptions-item>
+          <el-descriptions-item label="Order ID">{{ selectedRoute.orderId }}</el-descriptions-item>
+          <el-descriptions-item label="Delivery Date">{{ selectedRoute.date }}</el-descriptions-item>
+          <el-descriptions-item label="Start">{{ selectedRoute.startAddress }}</el-descriptions-item>
+          <el-descriptions-item label="End">{{ selectedRoute.endAddress }}</el-descriptions-item>
+          <el-descriptions-item label="Delivery Distance">{{ selectedRoute.distance }}km</el-descriptions-item>
+          <el-descriptions-item label="Delivery Duration">{{ selectedRoute.duration }}minutes</el-descriptions-item>
+          <el-descriptions-item label="Delivery Status">{{ selectedRoute.status }}</el-descriptions-item>
+          <el-descriptions-item label="Rider">{{ selectedRoute.rider || 'Unknown' }}</el-descriptions-item>
         </el-descriptions>
       </div>
     </el-dialog>
@@ -119,7 +119,7 @@ export default {
     return {
       loading: false,
       map: null,
-      mapKey: '你的高德地图Key', // 需要替换为实际的高德地图Key
+      mapKey: 'Your Amap Key', // Replace with actual Amap Key
       isTracking: false,
       trackingTimer: null,
       speedChart: null,
@@ -127,17 +127,17 @@ export default {
       currentPositionIndex: 0,
       polyline: null,
       marker: null,
-      // 当前配送信息
+      // Current delivery information
       currentDelivery: {
         orderId: 'O2023041501',
-        status: '配送中',
-        address: '浙江大学玉泉校区18号楼',
+        status: 'In Progress',
+        address: 'Zhejiang University Yuquan Campus, Building 18',
         estimatedTime: '15:30',
         distance: 3.2,
         duration: 15,
         progressPercentage: 60
       },
-      // GPS数据
+      // GPS data
       gpsData: {
         latitude: 30.259924,
         longitude: 120.132254,
@@ -145,12 +145,12 @@ export default {
         direction: 90,
         lastUpdate: '2023-04-12 15:20:30'
       },
-      // 历史路线记录
+      // Route history record
       routeHistory: [],
       currentPage: 1,
       pageSize: 5,
       total: 0,
-      // 路线详情对话框
+      // Route details dialog
       dialogVisible: false,
       selectedRoute: {}
     }
@@ -159,7 +159,7 @@ export default {
     this.initMap()
     this.initSpeedChart()
     this.fetchRouteHistory()
-    // 生成模拟路线数据
+    // Generate mock route data
     this.generateMockPositions()
   },
   beforeDestroy() {
@@ -181,14 +181,14 @@ export default {
         
         this.map = new AMap.Map('map-container', {
           zoom: 13,
-          center: [120.132254, 30.259924]  // 杭州坐标
+          center: [120.132254, 30.259924]  // Hangzhou coordinates
         })
         
-        // 添加地图控件
+        // Add map controls
         this.map.addControl(new AMap.Scale())
         this.map.addControl(new AMap.ToolBar())
         
-        // 初始化骑手标记
+        // Initialize rider marker
         this.marker = new AMap.Marker({
           position: [120.132254, 30.259924],
           icon: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png',
@@ -196,7 +196,7 @@ export default {
         })
         this.map.add(this.marker)
         
-        // 初始化路线
+        // Initialize route
         this.polyline = new AMap.Polyline({
           path: [],
           strokeColor: '#3498db',
@@ -206,7 +206,7 @@ export default {
         this.map.add(this.polyline)
         
       } catch (e) {
-        console.error('地图加载失败', e)
+        console.error('Map loading failed', e)
       }
     },
     initSpeedChart() {
@@ -214,7 +214,7 @@ export default {
       
       const option = {
         title: {
-          text: '配送速度变化',
+          text: 'Delivery Speed Variation',
           left: 'center'
         },
         tooltip: {
@@ -226,7 +226,7 @@ export default {
         },
         yAxis: {
           type: 'value',
-          name: '速度 (km/h)'
+          name: 'Speed (km/h)'
         },
         series: [{
           data: [10, 15, 8, 20, 12, 15, 18],
@@ -254,16 +254,16 @@ export default {
       
       this.speedChart.setOption(option)
       
-      // 监听窗口变化，更新图表大小
+      // Listen for window resize, update chart size
       window.addEventListener('resize', () => {
         this.speedChart.resize()
       })
     },
-    // 生成模拟路线数据
+    // Generate mock route data
     generateMockPositions() {
-      // 杭州浙大玉泉到西湖的路线模拟
+      // Mock route data from Zhejiang University Yuquan to West Lake
       this.mockPositions = [
-        [120.132254, 30.259924], // 浙大玉泉校区
+        [120.132254, 30.259924], // Zhejiang University Yuquan Campus
         [120.130254, 30.257924],
         [120.128254, 30.254924],
         [120.125254, 30.252924],
@@ -276,10 +276,10 @@ export default {
         [120.106254, 30.264924],
         [120.103254, 30.266924],
         [120.100254, 30.267924],
-        [120.097254, 30.269924], // 西湖
+        [120.097254, 30.269924], // West Lake
       ]
     },
-    // 开始路线跟踪
+    // Start route tracking
     startTracking() {
       if (this.isTracking) return
       
@@ -295,25 +295,25 @@ export default {
         
         const position = this.mockPositions[this.currentPositionIndex]
         
-        // 更新GPS数据
+        // Update GPS data
         this.gpsData.longitude = position[0]
         this.gpsData.latitude = position[1]
         this.gpsData.speed = Math.floor(Math.random() * 15) + 10
         this.gpsData.direction = Math.floor(Math.random() * 360)
         this.gpsData.lastUpdate = new Date().toLocaleString()
         
-        // 更新标记位置
+        // Update marker position
         this.marker.setPosition(position)
         
-        // 更新路线
+        // Update route
         const path = this.polyline.getPath()
         path.push(position)
         this.polyline.setPath(path)
         
-        // 更新地图视图
+        // Update map view
         this.map.setCenter(position)
         
-        // 更新配送进度
+        // Update delivery progress
         const progress = Math.min(Math.round((this.currentPositionIndex / (this.mockPositions.length - 1)) * 100), 100)
         this.currentDelivery.progressPercentage = progress
         this.currentDelivery.distance = (3.2 * progress / 100).toFixed(1)
@@ -321,12 +321,12 @@ export default {
         
         this.currentPositionIndex++
         
-        // 更新速度图表
+        // Update speed chart
         this.updateSpeedChart(this.gpsData.speed)
         
       }, 2000)
     },
-    // 停止路线跟踪
+    // Stop route tracking
     stopTracking() {
       if (this.trackingTimer) {
         clearInterval(this.trackingTimer)
@@ -334,17 +334,17 @@ export default {
       }
       this.isTracking = false
     },
-    // 更新速度图表
+    // Update speed chart
     updateSpeedChart(newSpeed) {
       const option = this.speedChart.getOption()
       const xData = option.xAxis[0].data
       const yData = option.series[0].data
       
-      // 移除最早的数据
+      // Remove oldest data
       xData.shift()
       yData.shift()
       
-      // 添加新数据
+      // Add new data
       const now = new Date()
       const timeStr = `${now.getHours()}:${now.getMinutes()}`
       xData.push(timeStr)
@@ -359,86 +359,86 @@ export default {
         }]
       })
     },
-    // 获取历史路线记录
+    // Get route history record
     fetchRouteHistory() {
       this.loading = true
-      // 模拟API请求
+      // Simulate API request
       setTimeout(() => {
         this.routeHistory = [
           {
             id: 1,
             date: '2023-04-12',
             orderId: 'O2023041201',
-            startAddress: '浙江大学玉泉校区',
-            endAddress: '西湖文化广场',
+            startAddress: 'Zhejiang University Yuquan Campus',
+            endAddress: 'West Lake Cultural Square',
             distance: 5.2,
             duration: 25,
-            status: '已完成',
-            rider: '张三'
+            status: 'Completed',
+            rider: 'Zhang San'
           },
           {
             id: 2,
             date: '2023-04-11',
             orderId: 'O2023041102',
-            startAddress: '黄龙体育中心',
-            endAddress: '杭州东站',
+            startAddress: 'Huanglong Sports Center',
+            endAddress: 'Hangzhou East Station',
             distance: 8.5,
             duration: 35,
-            status: '已完成',
-            rider: '张三'
+            status: 'Completed',
+            rider: 'Zhang San'
           },
           {
             id: 3,
             date: '2023-04-11',
             orderId: 'O2023041101',
-            startAddress: '浙江大学紫金港校区',
-            endAddress: '西溪湿地',
+            startAddress: 'Zhejiang University Zijingang Campus',
+            endAddress: 'Xixi Wetland',
             distance: 6.3,
             duration: 30,
-            status: '已完成',
-            rider: '张三'
+            status: 'Completed',
+            rider: 'Zhang San'
           },
           {
             id: 4,
             date: '2023-04-10',
             orderId: 'O2023041002',
-            startAddress: '杭州师范大学',
-            endAddress: '杭州动物园',
+            startAddress: 'Hangzhou Normal University',
+            endAddress: 'Hangzhou Zoo',
             distance: 12.1,
             duration: 45,
-            status: '已完成',
-            rider: '张三'
+            status: 'Completed',
+            rider: 'Zhang San'
           },
           {
             id: 5,
             date: '2023-04-10',
             orderId: 'O2023041001',
-            startAddress: '浙江工业大学',
-            endAddress: '武林广场',
+            startAddress: 'Zhejiang University of Technology',
+            endAddress: 'Wulin Square',
             distance: 7.8,
             duration: 32,
-            status: '已完成',
-            rider: '张三'
+            status: 'Completed',
+            rider: 'Zhang San'
           }
         ]
         this.total = 5
         this.loading = false
       }, 1000)
     },
-    // 刷新历史路线记录
+    // Refresh route history record
     refreshRouteHistory() {
       this.fetchRouteHistory()
     },
-    // 查看路线详情
+    // View route details
     async viewRouteDetail(row) {
       this.selectedRoute = row
       this.dialogVisible = true
       
-      // 等待对话框显示后初始化详情地图
+      // Wait for dialog to show before initializing detail map
       await this.$nextTick()
       this.initDetailMap()
     },
-    // 初始化详情地图
+    // Initialize detail map
     async initDetailMap() {
       try {
         const AMap = await AMapLoader.load({
@@ -449,46 +449,46 @@ export default {
         
         const detailMap = new AMap.Map('detail-map-container', {
           zoom: 12,
-          center: [120.132254, 30.259924]  // 杭州坐标
+          center: [120.132254, 30.259924]  // Hangzhou coordinates
         })
         
-        // 添加起点和终点标记
+        // Add start and end marker
         const startMarker = new AMap.Marker({
-          position: [120.132254, 30.259924], // 示例起点，实际应该从API获取
+          position: [120.132254, 30.259924], // Example start, should be fetched from API
           icon: 'https://webapi.amap.com/theme/v1.3/markers/n/start.png',
           offset: new AMap.Pixel(-13, -30)
         })
         
         const endMarker = new AMap.Marker({
-          position: [120.097254, 30.269924], // 示例终点，实际应该从API获取
+          position: [120.097254, 30.269924], // Example end, should be fetched from API
           icon: 'https://webapi.amap.com/theme/v1.3/markers/n/end.png',
           offset: new AMap.Pixel(-13, -30)
         })
         
         detailMap.add([startMarker, endMarker])
         
-        // 使用驾车规划
+        // Use driving planning
         const driving = new AMap.Driving({
           map: detailMap,
           policy: AMap.DrivingPolicy.LEAST_TIME
         })
         
         driving.search(
-          [120.132254, 30.259924], // 起点坐标
-          [120.097254, 30.269924], // 终点坐标
+          [120.132254, 30.259924], // Start coordinate
+          [120.097254, 30.269924], // End coordinate
           (status, result) => {
             if (status === 'complete') {
-              console.log('路线规划成功')
+              console.log('Route planning successful')
             } else {
-              console.error('路线规划失败', result)
+              console.error('Route planning failed', result)
             }
           }
         )
       } catch (e) {
-        console.error('详情地图加载失败', e)
+        console.error('Detail map loading failed', e)
       }
     },
-    // 自定义进度条颜色
+    // Custom progress bar color
     customColorMethod(percentage) {
       if (percentage < 30) {
         return '#909399'
@@ -498,7 +498,7 @@ export default {
         return '#67c23a'
       }
     },
-    // 分页相关方法
+    // Pagination related methods
     handleSizeChange(val) {
       this.pageSize = val
       this.fetchRouteHistory()

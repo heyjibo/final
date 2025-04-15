@@ -20,10 +20,10 @@ export default defineConfig({
   },
   server: {
     port: 5173,
-    open: true, // 自动打开浏览器
+    open: true, // auto open browser
     proxy: {
       '/api': {
-        target: 'http://localhost:8080', // 后端API地址
+        target: 'http://localhost:8080', // backend API address
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       }

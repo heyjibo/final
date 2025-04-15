@@ -2,15 +2,15 @@
   <div class="work-order-management">
     <el-card>
       <div slot="header" class="clearfix">
-        <span>工单管理</span>
-        <el-button style="float: right" type="primary" size="small">创建工单</el-button>
+        <span>Work Order Management</span>
+        <el-button style="float: right" type="primary" size="small">Create Work Order</el-button>
       </div>
       
-      <!-- 搜索和筛选 -->
+      <!-- Search and Filter -->
       <div class="filter-container">
         <el-input
           v-model="listQuery.search"
-          placeholder="工单编号/骑手名称"
+          placeholder="Work Order ID/Rider Name"
           style="width: 200px;"
           class="filter-item"
           @keyup.enter.native="handleFilter"
@@ -18,7 +18,7 @@
         />
         <el-select
           v-model="listQuery.status"
-          placeholder="工单状态"
+          placeholder="Order Status"
           clearable
           style="width: 120px"
           class="filter-item"
@@ -32,7 +32,7 @@
         </el-select>
         <el-select
           v-model="listQuery.type"
-          placeholder="工单类型"
+          placeholder="Order Type"
           clearable
           style="width: 120px"
           class="filter-item"
@@ -50,7 +50,7 @@
           icon="el-icon-search"
           @click="handleFilter"
         >
-          搜索
+          Search
         </el-button>
         <el-button
           class="filter-item"
@@ -58,57 +58,57 @@
           icon="el-icon-refresh"
           @click="resetFilter"
         >
-          重置
+          Reset
         </el-button>
       </div>
       
-      <!-- 工单列表 -->
+      <!-- Work Order List -->
       <el-table
         :data="workOrderList"
         border
         style="width: 100%"
         v-loading="listLoading"
       >
-        <el-table-column prop="id" label="工单编号" width="120" align="center" />
-        <el-table-column prop="title" label="工单标题" min-width="200" />
-        <el-table-column prop="type" label="类型" width="100" align="center">
+        <el-table-column prop="id" label="Work Order ID" width="120" align="center" />
+        <el-table-column prop="title" label="Work Order Title" min-width="200" />
+        <el-table-column prop="type" label="Type" width="100" align="center">
           <template slot-scope="scope">
             <el-tag :type="getTypeTagType(scope.row.type)">
               {{ scope.row.type }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="rider" label="骑手" width="100" align="center" />
-        <el-table-column prop="createTime" label="创建时间" width="150" align="center" />
-        <el-table-column prop="updateTime" label="更新时间" width="150" align="center" />
-        <el-table-column prop="status" label="状态" width="100" align="center">
+        <el-table-column prop="rider" label="Rider" width="100" align="center" />
+        <el-table-column prop="createTime" label="Created Time" width="150" align="center" />
+        <el-table-column prop="updateTime" label="Updated Time" width="150" align="center" />
+        <el-table-column prop="status" label="Status" width="100" align="center">
           <template slot-scope="scope">
             <el-tag :type="getStatusTagType(scope.row.status)">
               {{ scope.row.status }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" align="center">
+        <el-table-column label="Actions" width="180" align="center">
           <template slot-scope="scope">
             <el-button
               size="mini"
               @click="handleView(scope.row)"
             >
-              查看
+              View
             </el-button>
             <el-button
               size="mini"
               type="primary"
               @click="handleProcess(scope.row)"
-              :disabled="scope.row.status === '已关闭'"
+              :disabled="scope.row.status === 'Closed'"
             >
-              处理
+              Process
             </el-button>
           </template>
         </el-table-column>
       </el-table>
       
-      <!-- 分页 -->
+      <!-- Pagination -->
       <div class="pagination-container">
         <el-pagination
           @size-change="handleSizeChange"
@@ -140,17 +140,17 @@ export default {
         type: ''
       },
       statusOptions: [
-        { label: '未处理', value: '未处理' },
-        { label: '处理中', value: '处理中' },
-        { label: '已处理', value: '已处理' },
-        { label: '已关闭', value: '已关闭' }
+        { label: 'Pending', value: 'Pending' },
+        { label: 'Processing', value: 'Processing' },
+        { label: 'Resolved', value: 'Resolved' },
+        { label: 'Closed', value: 'Closed' }
       ],
       typeOptions: [
-        { label: '设备问题', value: '设备问题' },
-        { label: '系统故障', value: '系统故障' },
-        { label: '账户问题', value: '账户问题' },
-        { label: '订单纠纷', value: '订单纠纷' },
-        { label: '其他问题', value: '其他问题' }
+        { label: 'Device Issue', value: 'Device Issue' },
+        { label: 'System Failure', value: 'System Failure' },
+        { label: 'Account Problem', value: 'Account Problem' },
+        { label: 'Order Dispute', value: 'Order Dispute' },
+        { label: 'Other Issue', value: 'Other Issue' }
       ]
     }
   },
@@ -161,18 +161,18 @@ export default {
     fetchData() {
       this.listLoading = true
       
-      // 模拟API请求
+      // Simulate API request
       setTimeout(() => {
-        // 假数据
+        // Mock data
         const mockData = [
-          { id: 'WO20230601', title: '配送设备定位异常', type: '设备问题', rider: '张三', createTime: '2023-06-01 09:15', updateTime: '2023-06-01 10:30', status: '已处理' },
-          { id: 'WO20230602', title: '骑手App无法登录', type: '系统故障', rider: '李四', createTime: '2023-06-02 11:20', updateTime: '2023-06-02 14:45', status: '已关闭' },
-          { id: 'WO20230603', title: '工资结算异常', type: '账户问题', rider: '王五', createTime: '2023-06-03 08:30', updateTime: '2023-06-03 08:30', status: '未处理' },
-          { id: 'WO20230604', title: '顾客投诉送餐延迟', type: '订单纠纷', rider: '赵六', createTime: '2023-06-04 15:40', updateTime: '2023-06-04 16:20', status: '处理中' },
-          { id: 'WO20230605', title: '申请休假审批', type: '其他问题', rider: '钱七', createTime: '2023-06-05 10:15', updateTime: '2023-06-05 11:00', status: '已处理' }
+          { id: 'WO20230601', title: 'Delivery Device Location Error', type: 'Device Issue', rider: 'Zhang San', createTime: '2023-06-01 09:15', updateTime: '2023-06-01 10:30', status: 'Resolved' },
+          { id: 'WO20230602', title: 'Rider App Login Failure', type: 'System Failure', rider: 'Li Si', createTime: '2023-06-02 11:20', updateTime: '2023-06-02 14:45', status: 'Closed' },
+          { id: 'WO20230603', title: 'Salary Settlement Abnormality', type: 'Account Problem', rider: 'Wang Wu', createTime: '2023-06-03 08:30', updateTime: '2023-06-03 08:30', status: 'Pending' },
+          { id: 'WO20230604', title: 'Customer Complaint About Delivery Delay', type: 'Order Dispute', rider: 'Zhao Liu', createTime: '2023-06-04 15:40', updateTime: '2023-06-04 16:20', status: 'Processing' },
+          { id: 'WO20230605', title: 'Leave Request Approval', type: 'Other Issue', rider: 'Qian Qi', createTime: '2023-06-05 10:15', updateTime: '2023-06-05 11:00', status: 'Resolved' }
         ]
         
-        // 过滤数据
+        // Filter data
         let filtered = [...mockData]
         
         if (this.listQuery.search) {
@@ -193,7 +193,7 @@ export default {
         
         this.total = filtered.length
         
-        // 分页
+        // Pagination
         const start = (this.listQuery.page - 1) * this.listQuery.limit
         const end = start + this.listQuery.limit
         this.workOrderList = filtered.slice(start, end)
@@ -202,13 +202,13 @@ export default {
       }, 500)
     },
     
-    // 处理搜索
+    // Handle search
     handleFilter() {
       this.listQuery.page = 1
       this.fetchData()
     },
     
-    // 重置搜索
+    // Reset search
     resetFilter() {
       this.listQuery = {
         page: 1,
@@ -220,51 +220,51 @@ export default {
       this.fetchData()
     },
     
-    // 处理分页大小变化
+    // Handle page size change
     handleSizeChange(val) {
       this.listQuery.limit = val
       this.fetchData()
     },
     
-    // 处理页码变化
+    // Handle page number change
     handleCurrentChange(val) {
       this.listQuery.page = val
       this.fetchData()
     },
     
-    // 获取状态标签类型
+    // Get status tag type
     getStatusTagType(status) {
       const statusMap = {
-        '未处理': 'danger',
-        '处理中': 'warning',
-        '已处理': 'success',
-        '已关闭': 'info'
+        'Pending': 'danger',
+        'Processing': 'warning',
+        'Resolved': 'success',
+        'Closed': 'info'
       }
       return statusMap[status] || 'info'
     },
     
-    // 获取工单类型标签
+    // Get work order type tag
     getTypeTagType(type) {
       const typeMap = {
-        '设备问题': 'primary',
-        '系统故障': 'danger',
-        '账户问题': 'warning',
-        '订单纠纷': 'info',
-        '其他问题': ''
+        'Device Issue': 'primary',
+        'System Failure': 'danger',
+        'Account Problem': 'warning',
+        'Order Dispute': 'info',
+        'Other Issue': 'success'
       }
-      return typeMap[type] || ''
+      return typeMap[type] || 'info'
     },
     
-    // 查看工单
+    // View work order details
     handleView(row) {
-      this.$message.info('查看工单详情功能待开发')
-      console.log('查看工单', row)
+      // Implementation for viewing work order details
+      console.log('View work order:', row)
     },
     
-    // 处理工单
+    // Process work order
     handleProcess(row) {
-      this.$message.info('处理工单功能待开发')
-      console.log('处理工单', row)
+      // Implementation for processing work order
+      console.log('Process work order:', row)
     }
   }
 }
@@ -274,15 +274,16 @@ export default {
 .work-order-management {
   padding: 20px;
 }
+
 .filter-container {
   margin-bottom: 20px;
-  display: flex;
-  flex-wrap: wrap;
 }
+
 .filter-item {
   margin-right: 10px;
   margin-bottom: 10px;
 }
+
 .pagination-container {
   margin-top: 20px;
   text-align: right;
