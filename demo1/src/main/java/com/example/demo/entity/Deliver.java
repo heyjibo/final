@@ -9,8 +9,8 @@ import jakarta.persistence.Table;
 @Table(name = "deliver")
 public class Deliver {
     @Id
-    @Column(name = "work_id") // 对应表中的work_id字段
-    private String workId;  // 使用包装类型更安全
+    @Column(name = "work_id")
+    private String workId;
 
     @Column(name = "name")
     private String name;
@@ -18,7 +18,6 @@ public class Deliver {
     @Column(name = "age")
     private Integer age;
 
-    // 必须有无参构造函数
     public Deliver() {
     }
 
