@@ -1,44 +1,57 @@
 <template>
-   <div class="test-container">
-    <h2>Customer management testing</h2>
+  <div class="test-container">
+    <h2>Customer Management</h2>
     
     <div class="form-section">
       <h3>Create/Update Customer</h3>
       <input v-model="form.customerid" placeholder="Customer ID">
-      <div class="error">{{ errors.customerid }}</div>
+      <div v-if="errors.customerid" class="error">{{ errors.customerid }}</div>
       
       <input v-model="form.name" placeholder="Name">
-      <div class="error">{{ errors.name }}</div>
+      <div v-if="errors.name" class="error">{{ errors.name }}</div>
       
       <input v-model="form.age" type="number" placeholder="Age">
-      <div class="error">{{ errors.age }}</div>
+      <div v-if="errors.age" class="error">{{ errors.age }}</div>
       
       <input v-model="form.address" placeholder="Location">
-      <div class="error">{{ errors.address }}</div>
+      <div v-if="errors.address" class="error">{{ errors.address }}</div>
       
       <input v-model="form.numOfOrder" type="number" placeholder="Order Quantity">
-      <div class="error">{{ errors.numOfOrder }}</div>
+      <div v-if="errors.numOfOrder" class="error">{{ errors.numOfOrder }}</div>
       
       <input v-model="form.password" type="password" placeholder="Password">
-      <div class="error">{{ errors.password }}</div>
+      <div v-if="errors.password" class="error">{{ errors.password }}</div>
       
-      <button @click="submitCustomer">Submit</button>
-    </div>
-  
-    
-
-    <div class="action-buttons">
-      <button @click="fetchAllCustomers">Get all customers</button>
+      <div class="button-group">
+        <button @click="submitCustomer" class="submit-btn">Submit</button>
+        <button @click="clearForm" class="clear-btn">Clear All</button>
+         <button @click="clearAllCustomers" class="danger-btn">Clear All Customers</button>
+      </div>
     </div>
 
-    
+    <div class="action-section">
+      <button @click="fetchAllCustomers" class="fetch-btn">Get all customers</button>
+    </div>
+
     <div class="result-section">
       <h3>Customer List</h3>
+      <div v-if="customers.length === 0" class="empty-tip">No data available at the moment</div>
       <div v-for="c in customers" :key="c.customerid" class="customer-item">
-        <p>ID: {{ c.customerid }} - Full Name: {{ c.name }}</p>
-        <button @click="deleteCustomer(c.customerid)">Delete</button>
+        <div class="info">
+          <span class="customer-id">ID: {{ c.customerid }}</span>
+          <span>Name: {{ c.name }}</span>
+          <span>Age: {{ c.age }}</span>
+          <span>Orders: {{ c.numOfOrder }}</span>
+        </div>
+        <div class="actions">
+          <button @click="editCustomer(c)" class="edit-btn">Edit</button>
+          <button @click="deleteCustomer(c.customerid)" class="delete-btn">Delete</button>
+        </div>
       </div>
-      <pre v-if="responseData">{{ responseData }}</pre>
+    </div>
+
+    <div v-if="responseData" class="response-message">
+      <pre>{{ responseData }}</pre>
     </div>
   </div>
 </template>
@@ -70,6 +83,17 @@ export default {
     }
   },
   methods: {
+    clearForm() {
+      this.form = {
+        customerid: '',
+        name: '',
+        age: null,
+        address: '',
+        numOfOrder: null,
+        password: ''
+      }
+      this.responseData = null
+    },
     async fetchAllCustomers() {
       try {
         const res = await axios.get('/api/customer')
@@ -79,22 +103,39 @@ export default {
       }
     },
     async submitCustomer() {
-      if (!this.validateCustomerForm()) return; // use valid
+      if (!this.validateCustomerForm()) return;
       try {
         const isUpdate = !!this.form.customerid;
         const method = isUpdate ? 'put' : 'post';
         const url = isUpdate 
-          ? `/api/customer/${this.form.customerid}` 
-          : '/api/customer'; 
+          ? `/api/customer/${this.form.customerid}`
+          : '/api/customer';
 
         const res = await axios[method](url, this.form);
         
-        this.responseData = res.data
-        this.fetchAllCustomers()
+        this.responseData = `${isUpdate ? 'Update' : 'Crate'}successful: ${JSON.stringify(res.data, null, 2)}`;
+        this.fetchAllCustomers();
+        if (!isUpdate) this.clearForm(); 
       } catch (err) {
-        alert('Failed to operate: ' + err.response.data)
+        alert('Fail to operate: ' + err.response.data);
       }
     },
+    editCustomer(customer) {
+      this.form = { ...customer };
+      this.responseData = null;
+    },
+    async clearAllCustomers() {
+      if (!confirm('⚠️ Warning! This will delete all customer data, do you want to continue?')) return;
+      
+      try {
+        await axios.delete('/api/customer/all');
+        this.responseData = 'Successfully cleared all customer data!';
+        this.fetchAllCustomers();
+      } catch (err) {
+        alert('Clearing failed: ' + err.response.data);
+      }
+    },
+
     async deleteCustomer(id) {
       if (confirm(`Are you sure to delete the customer ${id}?`)) {
         try {
@@ -162,16 +203,111 @@ export default {
       }
 
       return isValid;
-    }
+    },
   }
 }
 </script>
 
 <style scoped>
-.error { 
+.test-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 1rem;
+  border: 1px solid #e1e1e1;
+  border-radius: 8px;
+}
+
+.form-section {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+input {
+  display: block;
+  width: 100%;
+  padding: 0.5rem;
+  margin: 0.5rem 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.button-group {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+.submit-btn { background: #67C23A; color: white; }
+.clear-btn { background: #909399; color: white; }
+.fetch-btn { background: #409EFF; color: white; }
+.delete-btn { background: #F56C6C; color: white; }
+
+.customer-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem;
+  margin: 0.5rem 0;
+  border: 1px solid #eee;
+  border-radius: 4px;
+}
+
+.info {
+  flex: 1;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.customer-id {
+  font-weight: bold;
+  min-width: 120px;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.response-message {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f4f4f5;
+  border-radius: 4px;
+}
+
+.empty-tip {
+  color: #909399;
+  text-align: center;
+  padding: 1rem;
+}
+
+.error {
   color: #f56c6c;
   font-size: 12px;
   margin: -5px 0 10px 0;
-} 
+}
 
+.clear-btn { 
+  background: #909399; 
+  color: white; 
+}
+.edit-btn { 
+  background: #E6A23C; 
+  color: white; 
+}
 </style>

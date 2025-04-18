@@ -1,22 +1,16 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
-    <CustomerTest/>
-    <DeliverTest/>
+    <nav>
+      <router-link to="/customer">Customer Management</router-link> | 
+      <router-link to="/deliver">Deliver Management</router-link>
+    </nav>
+    <router-view></router-view>
   </div>
 </template>
 
 <script>
-import CustomerTest from './components/CustomerTest.vue'
-import DeliverTest from './components/DeliverTest.vue'
-
 export default {
-  name: 'App',
-  components: {
-    CustomerTest,
-    DeliverTest
-  }
+  name: 'App'
 }
 </script>
 
@@ -27,6 +21,23 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  margin: 20px;
+}
+
+nav {
+  margin-bottom: 30px;
+}
+
+nav a {
+  padding: 10px 20px;
+  text-decoration: none;
+  color: #2c3e50;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+nav a.router-link-exact-active {
+  background-color: #409EFF;
+  color: white;
 }
 </style>

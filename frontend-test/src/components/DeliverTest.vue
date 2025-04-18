@@ -37,7 +37,7 @@
         <div v-if="delivers.length === 0" class="empty-tip">No data available at the moment</div>
         <div v-for="d in delivers" :key="d.workId" class="deliver-item">
           <div class="info">
-            <span class="work-id">工号: {{ d.workId }}</span>
+            <span class="work-id">Work Number: {{ d.workId }}</span>
             <span>Name: {{ d.name }}</span>
             <span>Age: {{ d.age }}</span>
           </div>
