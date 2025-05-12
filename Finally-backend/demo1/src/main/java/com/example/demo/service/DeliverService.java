@@ -25,6 +25,14 @@ public class DeliverService {
     }
 
     public Deliver saveDeliver(Deliver deliver) {
+        // 自动生成工号（如果未提供）
+        if (deliver.getWorkId() == null) {
+            String maxWorkId = deliverRepository.findMaxWorkId();
+            int nextId = maxWorkId == null ? 10000 : Integer.parseInt(maxWorkId) + 1;
+            deliver.setWorkId(String.valueOf(nextId));
+        }
+        // 初始化接单数为0
+        deliver.setNumofindent(0);
         return deliverRepository.save(deliver);
     }
 
@@ -32,7 +40,7 @@ public class DeliverService {
         deliverRepository.deleteById(workId);
     }
 
-    // ✅ 新增：根据 name 查询，如果查不到就报错
+    // 根据 name 查询，如果查不到就报错
     public List<Deliver> getDeliverByName(String name) {
         List<Deliver> result = deliverRepository.findByName(name);
         if (result.isEmpty()) {
@@ -40,4 +48,11 @@ public class DeliverService {
         }
         return result;
     }
+
+    public boolean checkPassword(String workId, String password) {
+        Deliver deliver = deliverRepository.findById(workId).orElse(null);
+        return deliver != null && deliver.getPassword().equals(password);
+    }
+
+
 }

@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.entity.Indent;
 import com.example.demo.repository.IndentRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,14 +36,13 @@ public class IndentService {
     }
 
     public Indent updateIndent(Indent indent) {
+        if (indent.getId() == null) {
+            throw new IllegalArgumentException("Indent ID must be set for update");
+        }
+        // 检查数据库中是否存在该ID的实体
+        if (!indentRepository.existsById(indent.getId())) {
+            throw new EntityNotFoundException("Indent with ID " + indent.getId() + " does not exist");
+        }
         return indentRepository.save(indent);
     }
-
-
-
-
-
-
-
-
 }

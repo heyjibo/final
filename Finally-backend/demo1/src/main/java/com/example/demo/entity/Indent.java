@@ -26,7 +26,7 @@ public class Indent {
     @Column(name = "Score")
     private int score;
 
-    @Column(name = "deliverID")
+    @Column(name = "deliverid")
     private String deliverID;
 
     @Column(name = "Money")
@@ -37,6 +37,16 @@ public class Indent {
 
     @Column(name = "State")
     private String state;
+
+    @Column(name = "completion_time")
+    private LocalDateTime completionTime;
+
+    public LocalDateTime getCompletionTime() {
+        return completionTime;
+    }
+    public void setCompletionTime(LocalDateTime completionTime) {
+        this.completionTime = completionTime;
+    }
 
 
 
